@@ -33,6 +33,7 @@ class OrphanagesController{
       latitude,
       longitude,
       about,
+      whatsapp,
       instructions,
       opening_hours,
       open_on_weekends
@@ -52,9 +53,10 @@ class OrphanagesController{
       latitude,
       longitude,
       about,
+      whatsapp,
       instructions,
       opening_hours,
-      open_on_weekends,
+      open_on_weekends: open_on_weekends === 'true',
       images
     }
 
@@ -63,6 +65,7 @@ class OrphanagesController{
       latitude: Yup.number().required(),
       longitude: Yup.number().required(),      
       about: Yup.string().required().max(300),
+      whatsapp: Yup.number().required(),
       instructions: Yup.string().required(),
       opening_hours: Yup.string().required(),
       open_on_weekends: Yup.boolean().required(),
@@ -82,6 +85,7 @@ class OrphanagesController{
     await orphanagesRepository.save(orphanage)    
 
     return res.status(201).json(orphanage)
+    
   }
 
   delete = async (req: Request, res: Response) => {
