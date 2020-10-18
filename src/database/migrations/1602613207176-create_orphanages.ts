@@ -1,4 +1,3 @@
-import { query } from "express";
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
 
 export class createOrphanages1602613207176 implements MigrationInterface {
@@ -21,15 +20,11 @@ export class createOrphanages1602613207176 implements MigrationInterface {
           },
           {
             name: 'latitude',
-            type: 'decimal',
-            scale: 10,
-            precision: 2,
+            type: 'varchar',
           },
           {
             name: 'longitude',
-            type: 'decimal',
-            scale: 10,
-            precision: 2,
+            type: 'varchar',
           },
           {
             name: 'about',
@@ -37,7 +32,7 @@ export class createOrphanages1602613207176 implements MigrationInterface {
           },
           {
             name: 'whatsapp',
-            type: 'integer',            
+            type: 'varchar',            
           },
           {
             name: 'instructions',
@@ -51,6 +46,11 @@ export class createOrphanages1602613207176 implements MigrationInterface {
             name: 'open_on_weekends',
             type: 'boolean',
             default: true,
+          },          
+          {
+            name: 'approved',
+            type: 'boolean',
+            default: false,
           }          
         ]
       }))

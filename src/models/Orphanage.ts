@@ -30,6 +30,9 @@ class Orphanage {
   @Column()
   open_on_weekends: boolean;
 
+  @Column()
+  approved: boolean;
+
   @OneToMany(() => OrphanageImages, image => image.orphanage, {
     cascade: ['insert', 'update']
   })
