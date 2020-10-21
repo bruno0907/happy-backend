@@ -7,10 +7,6 @@ import { verify } from 'jsonwebtoken'
 
 import Orphanage from '../models/Orphanage'
 
-interface TokenProps {
-  id: number;
-}
-
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
     const orphanagesRepository = getRepository(Orphanage)
@@ -38,6 +34,8 @@ class OrphanagesController{
   }
 
   store = async (req: Request, res: Response) => {  
+    const orphanagesRepository = getRepository(Orphanage)
+
     const {
       name,
       email,
@@ -55,9 +53,8 @@ class OrphanagesController{
     if(password !== password_verify){
       return res.sendStatus(401)
     }
-  
-    const orphanagesRepository = getRepository(Orphanage)
 
+    // Grava no orphanages_images o filename das imagens que estão sendo upadadas
     const requestImages = req.files as Express.Multer.File[]
     const images = requestImages.map(image => {
       return { 
@@ -98,133 +95,72 @@ class OrphanagesController{
 
     await schema.validate(data, {
       abortEarly: false,
-    })
-  
+    })    
+    
     const orphanage = orphanagesRepository.create(data)  
     await orphanagesRepository.save(orphanage)    
     return res.status(201).json(orphanage)    
   }
 
-
-
-
-
-  update = async (req: Request, res: Response) => {  
+  approveOrphanage = async (req: Request, res: Response) => {  
     const orphanagesRepository = getRepository(Orphanage)
 
     const {
-      name,   
-      email,  
-      latitude,
-      longitude,
-      about,
-      whatsapp,
-      instructions,      
-      opening_hours,
-      open_on_weekends
-    } = req.body    
-
-    return res.json({
-      name,   
-      email,  
-      latitude,
-      longitude,
-      about,
-      whatsapp,      
-      instructions,
-      opening_hours,
-      open_on_weekends
-    })
-
+      approved
+    } = req.body 
+    
     const { id } = req.params
+
     const { authorization } = req.headers
+
     const token = authorization.replace('Bearer', '').trim()
-
     if(!token){
-      return res.sendStatus(401)
-    }    
-
-    const orphanage = await orphanagesRepository.findOne(id, 
-      {
-        relations: ['images']
-      }
-    )
-
-    if(!orphanage){
-      return res.sendStatus(401)
+      return res.status(401).json({ message: 'Token is missing.'})
     }    
     
-    const isTokenValid = verify(token, process.env.SECRET_KEY) as TokenProps
-    
-    if(!isTokenValid){
-      return res.sendStatus(401)
+    const isValidToken = verify(token, process.env.SECRET_KEY)
+    if(!isValidToken){
+      return res.status(401).json({ message: 'Invalid Token.'})
     }
 
-    const token_id = String(isTokenValid.id)
+    const orphanage = await orphanagesRepository.findOne(id) 
+    if(!orphanage){
+      return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
+    }
 
-    if(token_id !== id){
-      return res.sendStatus(401)
-    }   
+    orphanage.approved = approved
 
-    const data = {
-      name,   
-      latitude,
-      longitude,
-      about,
-      whatsapp,
-      instructions,
-      opening_hours,
-      open_on_weekends: open_on_weekends === 'true',      
-    }       
-
-
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),      
-      email: Yup.string().required(),      
-      latitude: Yup.number().required(),
-      longitude: Yup.number().required(),      
-      about: Yup.string().required().max(300),
-      whatsapp: Yup.number().required(),
-      instructions: Yup.string().required(),
-      opening_hours: Yup.string().required(),
-      open_on_weekends: Yup.boolean().required(),
-      images: Yup.array(
-        Yup.object().shape({
-          path: Yup.string().required()
-        })
-      )
-    })
-
-    await schema.validate(data, {
-      abortEarly: false,
-    })      
-    
-    await orphanagesRepository.save(data)   
-
-    return res.status(201).json(orphanage)    
+    await orphanagesRepository.save(orphanage)    
+    return res.sendStatus(200)
   }
-
-
-
-
-
-
-
-  delete = async (req: Request, res: Response) => {
+  
+  deleteOrphanage = async (req: Request, res: Response) => {
     const orphanagesRepository = getRepository(Orphanage)   
     
     const { id } = req.params
 
-    const orphanage = await orphanagesRepository.findOne(id)  
+    const { authorization } = req.headers
 
+    const token = authorization.replace('Bearer', '').trim()
+    if(!token){
+      return res.status(401).json({ message: 'Token is missing.'})
+    }    
+    
+    const isValidToken = verify(token, process.env.SECRET_KEY)
+    if(!isValidToken){
+      return res.status(401).json({ message: 'Invalid Token.'})
+    }
+
+    const orphanage = await orphanagesRepository.findOne(id) 
     if(!orphanage){
-      return res.sendStatus(400)
+      return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
     }
 
     await orphanagesRepository.remove(orphanage)
     
     return res.sendStatus(200)
   }
+  
 }
 
 export default new OrphanagesController
