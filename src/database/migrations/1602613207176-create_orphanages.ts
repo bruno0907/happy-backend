@@ -19,6 +19,18 @@ export class createOrphanages1602613207176 implements MigrationInterface {
             type: 'varchar'
           },
           {
+            name: 'email',
+            type: 'varchar'
+          },
+          {
+            name: 'password',
+            type: 'varchar'
+          },
+          {
+            name: 'whatsapp',
+            type: 'varchar',            
+          },
+          {
             name: 'latitude',
             type: 'varchar',
           },
@@ -29,10 +41,6 @@ export class createOrphanages1602613207176 implements MigrationInterface {
           {
             name: 'about',
             type: 'text',            
-          },
-          {
-            name: 'whatsapp',
-            type: 'varchar',            
           },
           {
             name: 'instructions',

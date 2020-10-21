@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm'
 import OrphanageImages from './OrphanageImages'
+import { hashSync } from 'bcryptjs'
 
 @Entity('orphanages')
 class Orphanage {
@@ -8,6 +9,18 @@ class Orphanage {
 
   @Column()
   name: string;
+
+  @Column()
+  email: string;
+  
+  @Column()
+  password: string;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  hashPassword(){
+    this.password = hashSync(this.password, 8)
+  }
 
   @Column()
   latitude: number;
