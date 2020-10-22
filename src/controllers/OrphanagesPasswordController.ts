@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm'
 import * as Yup from 'yup'
 
 import Orphanage from '../models/Orphanage'
+import { sendEmail } from '../modules/sendMail'
 
 class OrphanagesPasswordController{
   index = async (req: Request, res: Response) => {
@@ -10,13 +11,16 @@ class OrphanagesPasswordController{
 
     const { email } = req.body
 
-    const orphanage = await orphanagesRepository.find({ where: { email }})
+    const orphanage = await orphanagesRepository.findOne({ where: { email }})
 
-    if(!orphanage){
+        if(!orphanage){
       return res.sendStatus(401)
     }
 
-    // Adicionar envio de email de recuperação com o link para a tela pro usuário cadastrar nova senha
+    const { name } = orphanage    
+    
+    sendEmail({ name, email })
+    
     return res.sendStatus(200)
     
   }

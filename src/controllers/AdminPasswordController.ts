@@ -4,19 +4,24 @@ import * as Yup from 'yup'
 
 import Admin from '../models/Admin'
 
+import {sendEmail} from '../modules/sendMail'
+
 class AdminPasswordController{
   index = async (req: Request, res: Response) => {
     const adminRepository = getRepository(Admin)
 
     const { email } = req.body
 
-    const user = await adminRepository.find({ where: { email }})
+    const user = await adminRepository.findOne({ where: { email }})
 
     if(!user){
-      return res.sendStatus(401)
+      return res.status(401).json({ message: 'User not found'})
     }
 
-    // Adicionar envio de email de recuperação com o link para a tela pro usuário cadastrar nova senha
+    const { name } = user
+
+    sendEmail({name, email})
+    
     return res.sendStatus(200)
     
   }
