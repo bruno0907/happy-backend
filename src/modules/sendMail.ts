@@ -6,7 +6,7 @@ interface UserDataProps{
 }
 
 export const sendEmail = ({name, email}: UserDataProps) => {  
-  const route = "http://localhost:3000/app/new-password"
+  const route = 'http://localhost:3000/app/new-password?key='
 
   // Config do client SMTP
   const transport = nodemailer.createTransport({
@@ -67,9 +67,9 @@ export const sendEmail = ({name, email}: UserDataProps) => {
           </head>
           <body>                  
             <h1>Olá  ${name}!</h1>
-            <p>Então você esqueceu sua senha? Não tem problema! Utilize a nova senha abaixo para acessar novamente a plataforma e volte aos estudos.</p>
+            <p>Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.</p>
             <div>
-              <a href=${route} target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>
+              <a href="${route}${email}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>
             </div> 
           </body>
       </html>  
