@@ -3,9 +3,10 @@ import * as nodemailer from 'nodemailer'
 interface UserDataProps{  
   name: string;
   email: string;
+  token: string;
 }
 
-export const sendEmail = ({name, email}: UserDataProps) => {  
+export const sendEmail = ({name, email, token}: UserDataProps) => {  
   const route = 'http://localhost:3000/app/new-password?key='
 
   // Config do client SMTP
@@ -41,7 +42,7 @@ export const sendEmail = ({name, email}: UserDataProps) => {
             <title>Proffy - Recuperação de senha</title>
             <style>
               body {
-                background: #8257E5 url('https://');
+                background: linear-gradient(329.54deg, #29B6D1 0%, #00C7C7 100%);
                 color: #FFFFFF;
                 font-family: Sans-serif;  
                 padding: 22px;
@@ -69,7 +70,7 @@ export const sendEmail = ({name, email}: UserDataProps) => {
             <h1>Olá  ${name}!</h1>
             <p>Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.</p>
             <div>
-              <a href="${route}${email}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>
+              <a href="${route}${token}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>
             </div> 
           </body>
       </html>  

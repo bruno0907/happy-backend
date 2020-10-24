@@ -2,9 +2,15 @@ import { Request, Response } from 'express'
 import { getRepository } from 'typeorm'
 import * as Yup from 'yup'
 
+import { sign, verify, decode } from 'jsonwebtoken'
+
 import Admin from '../models/Admin'
 
 import {sendEmail} from '../modules/sendMail'
+
+interface TokenProps{
+  email: string;
+}
 
 class AdminPasswordController{
   index = async (req: Request, res: Response) => {
@@ -20,29 +26,40 @@ class AdminPasswordController{
 
     const { name } = user
 
-    sendEmail({name, email})
+    const token = sign(
+      {
+        id: user.id,
+        email: user.email,
+      }, 
+      process.env.SECRET_KEY, 
+      {
+        expiresIn: '1d'
+      }
+    )
+
+    sendEmail({name, email, token})
     
     return res.sendStatus(200)
     
   }
 
   update = async (req: Request, res: Response) => {      
-    const {      
-      email,
+    const {            
       password,
-      password_verify      
+      password_verify,    
+      token
     } = req.body    
 
-    const data = {      
-      email,
+    const data = {        
       password,
-      password_verify
+      password_verify,
+      token
     }
     
     const schema = Yup.object().shape({        
-      email: Yup.string().required(),
       password: Yup.string().required(),
-      password_verify: Yup.string().required()
+      password_verify: Yup.string().required(),
+      token: Yup.string().required(),
     })
 
     await schema.validate(data, {
@@ -50,16 +67,28 @@ class AdminPasswordController{
     })  
 
     if(password !== password_verify){
-      return res.sendStatus(401)
+      return res.sendStatus(400)
     }      
-    
-    const adminRepository = getRepository(Admin)
 
-    const user = await adminRepository.findOne({ where: { email }})
-    user.password = password
-    await adminRepository.save(user)
+    try {
+      const isTokenValid = verify(token, process.env.SECRET_KEY)    
 
-    res.sendStatus(200)
+      if(!isTokenValid){
+        return res.sendStatus(400)
+      }
+
+      const { email } = isTokenValid as TokenProps
+      
+      const adminRepository = getRepository(Admin)
+
+      const user = await adminRepository.findOne({ where: { email }})
+      user.password = password
+      await adminRepository.save(user)
+
+      res.sendStatus(200)
+    } catch {
+      return res.sendStatus(400)
+    }
   }
   
 }
