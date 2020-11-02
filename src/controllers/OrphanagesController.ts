@@ -112,7 +112,7 @@ class OrphanagesController{
     const { id } = req.params
 
     const { authorization } = req.headers
-
+    
     const token = authorization.replace('Bearer', '').trim()
     if(!token){
       return res.status(401).json({ message: 'Token is missing.'})
@@ -140,25 +140,33 @@ class OrphanagesController{
     const { id } = req.params
 
     const { authorization } = req.headers
-
-    const token = authorization.replace('Bearer', '').trim()
+    
+    const token = authorization.replace('Bearer', '').trim()        
+    
     if(!token){
       return res.status(401).json({ message: 'Token is missing.'})
     }    
     
-    const isValidToken = verify(token, process.env.SECRET_KEY)
-    if(!isValidToken){
-      return res.status(401).json({ message: 'Invalid Token.'})
-    }
+    try {
+      const isValidToken = verify(token, process.env.SECRET_KEY)
+      if(!isValidToken){
+        return res.status(401).json({ message: 'Invalid Token.'})
+      }
 
-    const orphanage = await orphanagesRepository.findOne(id) 
-    if(!orphanage){
-      return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
-    }
+      const orphanage = await orphanagesRepository.findOne(id) 
+      if(!orphanage){
+        return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
+      }
 
-    await orphanagesRepository.remove(orphanage)
+      await orphanagesRepository.remove(orphanage)
     
     return res.sendStatus(200)
+    } catch (error) {
+      console.log(error.message)
+      return res.status(500).json({
+        error: error.message        
+      })
+    }
   }
   
 }

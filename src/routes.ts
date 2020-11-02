@@ -10,6 +10,7 @@ import AuthController from './controllers/AuthController'
 
 import AdminController from './controllers/AdminController'
 import AdminPasswordController from './controllers/AdminPasswordController'
+import ImagesController from './controllers/ImagesController'
 
 const route = Router()
 const upload = multer(uploadConfig)
@@ -27,6 +28,8 @@ route.patch('/app/admin/new-password', AdminPasswordController.update)
 
 route.delete('/app/orphanages/delete/:id', OrphanagesController.deleteOrphanage)
 route.patch('/app/orphanages/approve/:id', OrphanagesController.approveOrphanage)
+
+route.delete('/app/orphanage/image/remove/:id', ImagesController.deleteImage)
 
 route.post('/app/admin/create', AdminController.store)
 route.post('/app/admin/authenticate', AuthController.adminAuth)
