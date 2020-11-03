@@ -41,8 +41,7 @@ class AdminController{
     delete admin.password
 
     return res.status(201).json(admin)    
-  } 
-  
+  }   
 }
 
 export default new AdminController

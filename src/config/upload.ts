@@ -1,4 +1,4 @@
-
+import { Request } from 'express'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
 import aws from 'aws-sdk'
@@ -55,8 +55,8 @@ export default {
   storage: storageTypes[process.env.STORAGE_TYPE],
   limits: {
     fileSize: MAX_SIZE_TWO_MEGABYTES,    
-  },
-  fileFilter: (req, file , cb) => {
+  },  
+  fileFilter: (req: Request, file: { mimetype: string } , cb: (arg0: Error, arg1: boolean) => void) => {
     const allowedMimes = [
       'image/jpeg',
       'image/png',
@@ -66,7 +66,8 @@ export default {
     if(allowedMimes.includes(file.mimetype)){
       cb(null, true)
     } else {
-      cb(new Error('Invalid file type'))
+      cb(new Error('Invalid file type'), true)
+      // throw new Error('Invalid file type')
     }
   }
 }

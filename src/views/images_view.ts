@@ -4,7 +4,7 @@ export default {
   render(image: OrphanageImages) {
     return {
       id: image.id,
-      url: `${process.env.API_URL}/uploads/${image.path}`,
+      url: `${process.env.API_URL}${process.env.STORAGE_URL}${image.path}`,
     }
   },
 

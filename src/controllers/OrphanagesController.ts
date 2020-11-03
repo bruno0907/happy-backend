@@ -115,7 +115,7 @@ class OrphanagesController{
       whatsapp,
       instructions,
       opening_hours,
-      open_on_weekends,        
+      open_on_weekends
     } = req.body        
 
     const requestImages = req.files as Express.Multer.File[]
@@ -129,7 +129,7 @@ class OrphanagesController{
       whatsapp,
       instructions,
       opening_hours,
-      open_on_weekends, 
+      open_on_weekends: open_on_weekends === 'true'       , 
       approved: false,              
     }
 
@@ -138,7 +138,7 @@ class OrphanagesController{
 
       if(!orphanage){
         return res.status(401).json({ error: 'Orphanage not found.'})
-      }      
+      }            
 
       const images = requestImages.map(image => {
         return {           
@@ -156,7 +156,7 @@ class OrphanagesController{
       // sendMail(orphanage.email, message) 
       // Send an email to the adminstrator to let him know that the user made changes to the orphanage
 
-      return res.sendStatus(200)
+      return res.sendStatus(200)      
       
     } catch (error) {
       return res.status(500).json(error)
