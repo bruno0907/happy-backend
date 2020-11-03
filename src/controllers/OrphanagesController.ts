@@ -102,48 +102,42 @@ class OrphanagesController{
   }
 
   updateOrphanage = async (req: Request, res: Response) => {    
-    try {
-      const orphanagesRepository = getRepository(Orphanage)
-      const imagesRepository = getRepository(OrphanageImages)
-  
-      const { id } = req.params      
-  
-      const {
-        name,
-        latitude,
-        longitude,
-        about,
-        whatsapp,
-        instructions,
-        opening_hours,
-        open_on_weekends,        
-      } = req.body        
-  
-      const requestImages = req.files as Express.Multer.File[]
-      // const images = requestImages.map(image => {
-      //   return {           
-      //     path: image.filename,
-      //     orphanage
-      //   }
-      // })   
+    const orphanagesRepository = getRepository(Orphanage)
+    const imagesRepository = getRepository(OrphanageImages)
 
-      const data = {
-        id: Number(id),
-        name,
-        latitude,
-        longitude,
-        about,
-        whatsapp,
-        instructions,
-        opening_hours,
-        open_on_weekends, 
-        approved: false,              
-      }
-      
+    const { id } = req.params      
+
+    const {
+      name,
+      latitude,
+      longitude,
+      about,
+      whatsapp,
+      instructions,
+      opening_hours,
+      open_on_weekends,        
+    } = req.body        
+
+    const requestImages = req.files as Express.Multer.File[]
+
+    const data = {
+      id: Number(id),
+      name,
+      latitude,
+      longitude,
+      about,
+      whatsapp,
+      instructions,
+      opening_hours,
+      open_on_weekends, 
+      approved: false,              
+    }
+
+    try {      
       const orphanage = await orphanagesRepository.preload(data)
 
       if(!orphanage){
-        res.status(401).json({ error: 'Orphanage not found.'})
+        return res.status(401).json({ error: 'Orphanage not found.'})
       }      
 
       const images = requestImages.map(image => {
@@ -158,13 +152,14 @@ class OrphanagesController{
         await imagesRepository.save(images)
       })
 
-      delete orphanage.email
-      delete orphanage.password
+      // An idea to implement perhaps?
+      // sendMail(orphanage.email, message) 
+      // Send an email to the adminstrator to let him know that the user made changes to the orphanage
 
-      res.sendStatus(200)
+      return res.sendStatus(200)
       
     } catch (error) {
-      res.status(500).json(error)
+      return res.status(500).json(error)
     }  
   }
 
@@ -190,19 +185,16 @@ class OrphanagesController{
       return res.sendStatus(200)  
 
     } catch (error) {
-      res.status(500).json({
-        error: error.message
-      })
-    }
-    
+      return res.status(500).json({ error: error.message })
+    }    
   }
   
   deleteOrphanage = async (req: Request, res: Response) => {
-    try {
-      const orphanagesRepository = getRepository(Orphanage)   
-      
-      const { id } = req.params   
+    const orphanagesRepository = getRepository(Orphanage)   
+    
+    const { id } = req.params   
 
+    try {
       const orphanage = await orphanagesRepository.findOne(id) 
       if(!orphanage){
         return res.status(401).json({ message: 'Orphanage not found.'})
@@ -214,10 +206,8 @@ class OrphanagesController{
 
     } catch (error) {      
       return res.status(500).json({ error: error.message })
-
     }
-  }
-  
+  }  
 }
 
 export default new OrphanagesController
