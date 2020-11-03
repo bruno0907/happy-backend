@@ -1,11 +1,10 @@
 import { Request, Response } from 'express'
-import { getRepository } from 'typeorm'
+import { getManager, getRepository } from 'typeorm'
 import orphanageView from '../views/orphanages_view'
 import * as Yup from 'yup'
 
-import { verify } from 'jsonwebtoken'
-
 import Orphanage from '../models/Orphanage'
+import OrphanageImages from '../models/OrphanageImages'
 
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
@@ -61,7 +60,7 @@ class OrphanagesController{
         path: image.filename 
       }
     })   
-
+    
     const data = {
       name,
       email,
@@ -102,6 +101,73 @@ class OrphanagesController{
     return res.status(201).json(orphanage)    
   }
 
+  updateOrphanage = async (req: Request, res: Response) => {    
+    try {
+      const orphanagesRepository = getRepository(Orphanage)
+      const imagesRepository = getRepository(OrphanageImages)
+  
+      const { id } = req.params      
+  
+      const {
+        name,
+        latitude,
+        longitude,
+        about,
+        whatsapp,
+        instructions,
+        opening_hours,
+        open_on_weekends,        
+      } = req.body        
+  
+      const requestImages = req.files as Express.Multer.File[]
+      // const images = requestImages.map(image => {
+      //   return {           
+      //     path: image.filename,
+      //     orphanage
+      //   }
+      // })   
+
+      const data = {
+        id: Number(id),
+        name,
+        latitude,
+        longitude,
+        about,
+        whatsapp,
+        instructions,
+        opening_hours,
+        open_on_weekends, 
+        approved: false,              
+      }
+      
+      const orphanage = await orphanagesRepository.preload(data)
+
+      if(!orphanage){
+        res.status(401).json({ error: 'Orphanage not found.'})
+      }      
+
+      const images = requestImages.map(image => {
+        return {           
+          path: image.filename,
+          orphanage
+        }
+      })   
+      
+      await getManager().transaction(async orphanagesRepository => {
+        await orphanagesRepository.save(orphanage)
+        await imagesRepository.save(images)
+      })
+
+      delete orphanage.email
+      delete orphanage.password
+
+      res.sendStatus(200)
+      
+    } catch (error) {
+      res.status(500).json(error)
+    }  
+  }
+
   approveOrphanage = async (req: Request, res: Response) => {  
     const orphanagesRepository = getRepository(Orphanage)
 
@@ -111,61 +177,44 @@ class OrphanagesController{
     
     const { id } = req.params
 
-    const { authorization } = req.headers
-    
-    const token = authorization.replace('Bearer', '').trim()
-    if(!token){
-      return res.status(401).json({ message: 'Token is missing.'})
-    }    
-    
-    const isValidToken = verify(token, process.env.SECRET_KEY)
-    if(!isValidToken){
-      return res.status(401).json({ message: 'Invalid Token.'})
+    try {
+      const orphanage = await orphanagesRepository.findOne(id) 
+
+      if(!orphanage){
+        return res.status(401).json({ message: 'Orphanage not found.'})
+      }
+  
+      orphanage.approved = approved
+  
+      await orphanagesRepository.save(orphanage)    
+      return res.sendStatus(200)  
+
+    } catch (error) {
+      res.status(500).json({
+        error: error.message
+      })
     }
-
-    const orphanage = await orphanagesRepository.findOne(id) 
-    if(!orphanage){
-      return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
-    }
-
-    orphanage.approved = approved
-
-    await orphanagesRepository.save(orphanage)    
-    return res.sendStatus(200)
+    
   }
   
   deleteOrphanage = async (req: Request, res: Response) => {
-    const orphanagesRepository = getRepository(Orphanage)   
-    
-    const { id } = req.params
-
-    const { authorization } = req.headers
-    
-    const token = authorization.replace('Bearer', '').trim()        
-    
-    if(!token){
-      return res.status(401).json({ message: 'Token is missing.'})
-    }    
-    
     try {
-      const isValidToken = verify(token, process.env.SECRET_KEY)
-      if(!isValidToken){
-        return res.status(401).json({ message: 'Invalid Token.'})
-      }
+      const orphanagesRepository = getRepository(Orphanage)   
+      
+      const { id } = req.params   
 
       const orphanage = await orphanagesRepository.findOne(id) 
       if(!orphanage){
-        return res.status(401).json({ message: 'Orphanage not found or invalid id.'})
+        return res.status(401).json({ message: 'Orphanage not found.'})
       }
 
       await orphanagesRepository.remove(orphanage)
     
-    return res.sendStatus(200)
-    } catch (error) {
-      console.log(error.message)
-      return res.status(500).json({
-        error: error.message        
-      })
+      return res.sendStatus(200)
+
+    } catch (error) {      
+      return res.status(500).json({ error: error.message })
+
     }
   }
   

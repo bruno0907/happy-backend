@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { sign } from 'jsonwebtoken'
 import { getRepository } from 'typeorm'
 import * as Yup from 'yup'
 
@@ -13,13 +14,24 @@ class OrphanagesPasswordController{
 
     const orphanage = await orphanagesRepository.findOne({ where: { email }})
 
-        if(!orphanage){
+    if(!orphanage){
       return res.sendStatus(401)
     }
 
-    const { name } = orphanage    
+    const { name } = orphanage
     
-    sendEmail({ name, email })
+    const token = sign(
+      {
+        id: orphanage.id,
+        email,
+      }, 
+      process.env.SECRET_KEY, 
+      {
+        expiresIn: '1d'
+      }
+    )
+    
+    sendEmail({ name, email, token })
     
     return res.sendStatus(200)
     
