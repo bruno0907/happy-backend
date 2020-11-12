@@ -8,66 +8,51 @@ import Orphanage from '../models/Orphanage'
 import Admin from '../models/Admin'
 
 class AuthController{
-  orphanageAuth = async( req: Request, res: Response ) => {
-    const orphanageRepository = getRepository(Orphanage)
-
-    const { email, password } = req.body    
-
-    const user = await orphanageRepository.findOne({ where: { email }})
-
-    if(!user){
-      return res.sendStatus(401)
+  orphanageAuth = async( req: Request, res: Response ) => {    
+    try {
+      return res.status(201).json(req.params.authorization)
+    } catch (error) {
+      return res.status(500).json(error)
     }
-
-    const isValidPassword = await compare(password, user.password)
-
-    if(!isValidPassword){
-      return res.sendStatus(401)
-    }
-
-    const token = sign(
-      { id: user.id }, // Payload (informações a serem armazenadas do usuário dentro do token)
-      process.env.SECRET_KEY, // Secret key de decrypt do token 
-      { expiresIn: '1d' } // tempo de duração do token
-    )    
-
-    delete user.password
-
-    return res.status(200).json({ 
-      user,
-      token
-    })
   }
 
-  adminAuth = async( req: Request, res: Response ) => {
+  adminAuth = async(req: Request, res: Response) => {
     const adminRepository = getRepository(Admin)
 
-    const { email, password } = req.body
+    const { authorization } = req.headers
+    const credentials = Buffer.from(authorization.replace('Basic', '').trim(), 'base64').toString()
+    const [username, password] = credentials.split(':')
 
-    const user = await adminRepository.findOne({ where: { email }})
 
-    if(!user){
-      return res.sendStatus(401)
+    try {  
+      const user = await adminRepository.findOne({ where: { email: username }})
+  
+      if(!user){
+        return res.sendStatus(401)
+      }
+  
+      const isValidPassword = await compare(password, user.password)
+  
+      if (!isValidPassword) {
+        return res.sendStatus(401)
+      }
+  
+      const token = sign(
+        { id: user.id }, // Payload (informações a serem armazenadas do usuário dentro do token)
+        process.env.SECRET_KEY, // Secret key de decrypt do token 
+        { expiresIn: 86400 } // tempo de duração do token
+      )    
+
+      delete user.password // Requires revision of why i was sending the user password to the response
+
+      return res.status(200).json({ 
+        user,
+        token
+      })
+      
+    } catch (error) {
+      return res.status(500).json(error)
     }
-
-    const isValidPassword = await compare(password, user.password)
-
-    if (!isValidPassword) {
-      return res.sendStatus(401)
-    }
-
-    const token = sign(
-      { id: user.id }, // Payload (informações a serem armazenadas do usuário dentro do token)
-      process.env.SECRET_KEY, // Secret key de decrypt do token 
-      { expiresIn: '1d' } // tempo de duração do token
-    )    
-
-    // delete user.password
-
-    return res.status(200).json({ 
-      user,
-      token
-    })
   }  
 
 }

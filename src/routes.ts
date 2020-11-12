@@ -20,7 +20,6 @@ const upload = multer(uploadConfig)
 route.get('/orphanages', OrphanagesController.index)
 route.get('/orphanages/:id', OrphanagesController.show)
 route.post('/orphanages', upload.array('images'), OrphanagesController.store)
-route.post('/orphanages/authenticate', AuthController.orphanageAuth)
 
 route.post('/orphanages/password-recovery', OrphanagesPasswordController.index)
 route.patch('/orphanages/new-password', OrphanagesPasswordController.update)
@@ -36,6 +35,8 @@ route.delete('/app/orphanages/delete/:id', AuthMiddleware, OrphanagesController.
 route.delete('/app/orphanages/image/remove/:id', AuthMiddleware, ImagesController.removeOrphanageImage)
 
 route.post('/app/admin/create', AdminController.store)
-route.post('/app/admin/authenticate', AuthController.adminAuth)
+
+route.get('/app/admin/authenticate', AuthController.adminAuth)
+route.get('/orphanages/authenticate', AuthController.orphanageAuth)
 
 export default route
