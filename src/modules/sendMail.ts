@@ -3,11 +3,21 @@ import * as nodemailer from 'nodemailer'
 interface UserDataProps{  
   name: string;
   email: string;
-  token: string;
+  subject: string;
+  message: string;
+  token?: string;
+  link: string;
 }
 
-export const sendEmail = ({name, email, token}: UserDataProps) => {  
-  const route = 'http://localhost:3000/app/new-password?key='
+export const sendEmail = (
+  {
+    name, 
+    email, 
+    subject, 
+    message,
+    token, 
+    link
+  }: UserDataProps) => {  
 
   // Config do client SMTP
   const transport = nodemailer.createTransport({
@@ -20,12 +30,8 @@ export const sendEmail = ({name, email, token}: UserDataProps) => {
   })
 
   transport.verify(error => {
-    if(error){
-      console.log('Server is no go!')      
+    if(error){         
       throw new Error('Cannot connect to the mail server')
-
-    } else {
-      console.log('Server is ready to go')      
     }
   })
 
@@ -33,7 +39,7 @@ export const sendEmail = ({name, email, token}: UserDataProps) => {
   transport.sendMail({
     from: 'Happy - Admin <noreply@happy.io>',
     to: email,
-    subject: 'Solicitação de redefinição de senha da plataforma Happy',    
+    subject: subject,    
     html: `    
           <html lang="pt-BR">
           <head>
@@ -48,45 +54,55 @@ export const sendEmail = ({name, email, token}: UserDataProps) => {
                 padding: 22px;
               }
               h1 {
-                font-size: 36px;
+                font-size: 48px;
+                margin: 10px 0
+              }
+              h2 {
+                font-size: 24px;
               }
               p {
-                font-size: 16px;
+                font-size: 14px;
+                font-weight: bold;
                 line-height: 22px;
+              }
+              a {
+                text-decoration: none;
+                color: #FFF;
               }
               div {
                 margin: 44px 0;
               }
               span {              
                 padding: 12px 24px;
-                background: #FFFF;
-                color: #32264D;
+                background: #12D4E0;                
                 font-size: 24px;
-                font-weight: bold;                
+                font-weight: bold;      
+                border-radius: 8px;          
               }          
             </style>
           </head>
-          <body>                  
-            <h1>Olá  ${name}!</h1>
-            <p>Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.</p>
+          <body>                 
+            <h1>Happy!</h1>
+            <h2>Olá  ${name}!</h2>
+            <p>${message}</p>
             <div>
-              <a href="${route}${token}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>
+              ${token ? 
+                `<a href="${link}${token}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
+               : 
+                `<a href="${link}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
+              }
             </div> 
           </body>
       </html>  
-    `    
+    `        
   }, error => {    
 
-    if(error){
-      console.log('Redefinition email cannot be sent')    
-      console.log(error.message)  
+    if(error){      
       return {
         status: 'Error',
         statusCode: 400
       }
-    } 
-
-    console.log('Success! Redefinition email sent successfully!!')
+    }     
     return {
       status: 'Success',
       statusCode: 200
@@ -94,5 +110,3 @@ export const sendEmail = ({name, email, token}: UserDataProps) => {
         
   })    
 }
-
-// export default sendEmail

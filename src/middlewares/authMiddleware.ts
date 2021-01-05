@@ -16,7 +16,7 @@ export default function AuthMiddleware(req: Request, res: Response, next: NextFu
     const isValidToken = verify(token, process.env.SECRET_KEY)    
     if(!isValidToken){      
       return res.status(401).json({ message: 'Invalid/Expired Token.'})
-    }
+    }        
   
     next()
     

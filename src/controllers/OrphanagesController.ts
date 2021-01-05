@@ -6,6 +6,8 @@ import * as Yup from 'yup'
 import Orphanage from '../models/Orphanage'
 import OrphanageImages from '../models/OrphanageImages'
 
+import { sendEmail } from '../modules/sendMail'
+
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
     const orphanagesRepository = getRepository(Orphanage)
@@ -182,6 +184,34 @@ class OrphanagesController{
       orphanage.approved = approved
   
       await orphanagesRepository.save(orphanage)    
+      return res.sendStatus(200)  
+
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }    
+  }
+
+  rejectOrphanage = async (req: Request, res: Response) => {  
+    const orphanagesRepository = getRepository(Orphanage)    
+    
+    const { id } = req.params
+
+    try {
+      const orphanage = await orphanagesRepository.findOne(id) 
+
+      if(!orphanage){
+        return res.status(401).json({ message: 'Orphanage not found.'})
+      }      
+
+      const { name, email } = orphanage
+      
+      sendEmail({
+        name, 
+        email,         
+        subject: `Revise seus dados ${name} - Happy`,
+        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,
+        link: `http://localhost:3000/app/dashboard/orphanage/edit/${id}`
+      })
       return res.sendStatus(200)  
 
     } catch (error) {

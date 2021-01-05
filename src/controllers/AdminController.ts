@@ -13,6 +13,7 @@ class AdminController{
       email,
       password,
       password_verify,      
+      isAdmin
     } = req.body
 
     if(password !== password_verify){
@@ -22,13 +23,15 @@ class AdminController{
     const data = {
       name,
       email,
-      password,      
+      password,    
+      isAdmin  
     }    
 
     const schema = Yup.object().shape({
       name: Yup.string().required(),      
       email: Yup.string().required(),
-      password: Yup.string().required(),      
+      password: Yup.string().required(),  
+      isAdmin: Yup.boolean().required()
     })
 
     await schema.validate(data, {

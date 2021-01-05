@@ -27,6 +27,10 @@ export class createAdmin1603219719712 implements MigrationInterface {
                         name: 'password',
                         type: 'varchar'
                       },
+                      {
+                        name: 'isAdmin',
+                        type: 'boolean'
+                      },
                 ]
             })
         )

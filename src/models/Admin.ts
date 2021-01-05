@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm'
-import OrphanageImages from './OrphanageImages'
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate } from 'typeorm'
 import { hashSync } from 'bcryptjs'
 
 @Entity('admin')
@@ -15,6 +14,9 @@ class Admin {
   
   @Column()
   password: string;
+
+  @Column()
+  isAdmin: boolean;
 
   @BeforeInsert()
   @BeforeUpdate()

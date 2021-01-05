@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { getRepository } from 'typeorm'
 import * as Yup from 'yup'
 
-import { sign, verify, decode } from 'jsonwebtoken'
+import { sign, verify } from 'jsonwebtoken'
 
 import Admin from '../models/Admin'
 
@@ -37,7 +37,14 @@ class AdminPasswordController{
       }
     )
 
-    sendEmail({name, email, token})
+    sendEmail({
+      name, 
+      email, 
+      subject: 'Solicitação de redefinição de senha - Happy',
+      message: 'Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.',
+      token, 
+      link: 'http://localhost:3000/app/new-password?key='
+    })
     
     return res.sendStatus(200)
     
@@ -46,15 +53,18 @@ class AdminPasswordController{
   update = async (req: Request, res: Response) => {      
     const {            
       password,
-      password_verify,    
-      token
-    } = req.body    
+      password_verify,          
+    } = req.body   
+    
+    const { authorization } = req.headers
+
+    const token = authorization.replace('Bearer', '').trim()
 
     const data = {        
       password,
       password_verify,
       token
-    }
+    }    
     
     const schema = Yup.object().shape({        
       password: Yup.string().required(),
@@ -73,7 +83,7 @@ class AdminPasswordController{
     try {
       const isTokenValid = verify(token, process.env.SECRET_KEY)    
 
-      if(!isTokenValid){
+      if(!isTokenValid){        
         return res.sendStatus(400)
       }
 
@@ -86,7 +96,7 @@ class AdminPasswordController{
       await adminRepository.save(user)
 
       res.sendStatus(200)
-    } catch {
+    } catch {      
       return res.sendStatus(400)
     }
   }
