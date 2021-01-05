@@ -4,12 +4,11 @@ import multer from 'multer'
 import uploadConfig from './config/upload'
 
 import OrphanagesController from './controllers/OrphanagesController'
-import OrphanagesPasswordController from './controllers/OrphanagesPasswordController'
 
 import AuthController from './controllers/AuthController'
 
 import AdminController from './controllers/AdminController'
-import AdminPasswordController from './controllers/AdminPasswordController'
+import PasswordController from './controllers/PasswordController'
 import ImagesController from './controllers/ImagesController'
 
 import AuthMiddleware from './middlewares/authMiddleware'
@@ -21,11 +20,8 @@ route.get('/orphanages', OrphanagesController.index)
 route.get('/orphanages/:id', OrphanagesController.show)
 route.post('/orphanages', upload.array('images'), OrphanagesController.store)
 
-route.post('/orphanages/password-recovery', OrphanagesPasswordController.index)
-route.patch('/orphanages/new-password', OrphanagesPasswordController.update)
-
-route.post('/app/admin/password-recovery', AdminPasswordController.index)
-route.patch('/app/admin/new-password', AuthMiddleware, AdminPasswordController.update)
+route.post('/app/admin/password-recovery', PasswordController.index)
+route.patch('/app/admin/new-password', AuthMiddleware, PasswordController.update)
 
 route.patch('/app/orphanages/approve/:id', AuthMiddleware, OrphanagesController.approveOrphanage)
 route.get('/app/orphanages/reject/:id', AuthMiddleware, OrphanagesController.rejectOrphanage)

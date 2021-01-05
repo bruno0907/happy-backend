@@ -21,18 +21,17 @@ class AuthController{
     try {  
       const admin = await adminRepository.findOne({ where: { email: username }})
   
-      if(!admin){
+      if(!admin){        
         const orphanage = await orphanageRepository.findOne({ where: { email: username }})
 
-        if(!orphanage){
-          console.log('Orphanage')
-          return res.sendStatus(401)
+        if(!orphanage){              
+          return res.status(404).json({ message: 'User not found!'})
         }
-
+        
         const isValidPassword = await compare(password, orphanage.password)
   
-        if (!isValidPassword) {
-          return res.sendStatus(401)
+        if (!isValidPassword) {  
+          return res.status(401).json({ message: 'Orphanage username or password not found!'})
         }
 
         const token = sign(
@@ -43,17 +42,16 @@ class AuthController{
 
         delete orphanage.password
 
-        return res.status(200).json({
+        return res.status(202).json({
           orphanage,
           token
-        })
-        
+        })        
       }
   
       const isValidPassword = await compare(password, admin.password)
   
       if (!isValidPassword) {
-        return res.sendStatus(401)
+        return res.status(401).json({ message: 'Administrator username or password not found!'})
       }
   
       const token = sign(
@@ -64,7 +62,7 @@ class AuthController{
 
       delete admin.password
 
-      return res.status(200).json({ 
+      return res.status(202).json({ 
         admin,
         token
       })
