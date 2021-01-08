@@ -10,30 +10,39 @@ import { sendEmail } from '../modules/sendMail'
 
 import { sign } from 'jsonwebtoken'
 
+import OrphanagesIndexService from '../services/OrphanagesIndexService'
+import OrphanageShowService from '../services/OrphanageShowService'
+
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
-    const orphanagesRepository = getRepository(Orphanage)
+    try {
+      const orphanages = await OrphanagesIndexService.execute()
+      
+      if(!orphanages) return res.sendStatus(404)
+      
+      return res.status(200).json(orphanageView.renderMany(orphanages))
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
 
-    const orphanages = await orphanagesRepository.find({
-      relations: ['images']
-    })
+    }
 
-    return res.status(200).json(orphanageView.renderMany(orphanages))
   }
 
   show = async (req: Request, res: Response) => {
-    const orphanagesRepository = getRepository(Orphanage)
     const { id } = req.params
-    
-    const orphanage = await orphanagesRepository.findOne(id, {
-      relations: ['images']
-    })    
 
-    if(!orphanage){
-      return res.sendStatus(400)
-    }
+    try{
+      const orphanage = await OrphanageShowService.execute({ id })    
+      
+      if(!orphanage) return res.sendStatus(404)
 
-    return res.status(200).json(orphanageView.render(orphanage))
+      return res.status(200).json(orphanageView.render(orphanage))
+
+    }catch(error){
+      return res.status(500).json({ error: error.message })
+
+    }  
+
   }
 
   store = async (req: Request, res: Response) => {  
