@@ -5,48 +5,17 @@ import { compare } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 
 import Admin from '../models/Admin'
-import Orphanage from '../models/Orphanage'
-
 
 class AuthController{
-  auth = async(req: Request, res: Response) => {
-    const adminRepository = getRepository(Admin)    
-    const orphanageRepository = getRepository(Orphanage)
+  adminAuth = async(req: Request, res: Response) => {
+    const adminRepository = getRepository(Admin)        
 
     const { authorization } = req.headers
     const credentials = Buffer.from(authorization.replace('Basic', '').trim(), 'base64').toString()
     const [username, password] = credentials.split(':')
 
-
     try {  
       const admin = await adminRepository.findOne({ where: { email: username }})
-  
-      if(!admin){        
-        const orphanage = await orphanageRepository.findOne({ where: { email: username }})
-
-        if(!orphanage){              
-          return res.status(404).json({ message: 'User not found!'})
-        }
-        
-        const isValidPassword = await compare(password, orphanage.password)
-  
-        if (!isValidPassword) {  
-          return res.status(401).json({ message: 'Orphanage username or password not found!'})
-        }
-
-        const token = sign(
-          { id: orphanage.id},
-          process.env.SECRET_KEY,
-          { expiresIn: 86400 }
-        )
-
-        delete orphanage.password
-
-        return res.status(202).json({
-          orphanage,
-          token
-        })        
-      }
   
       const isValidPassword = await compare(password, admin.password)
   

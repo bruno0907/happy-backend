@@ -5,7 +5,6 @@ import * as Yup from 'yup'
 import { sign, verify } from 'jsonwebtoken'
 
 import Admin from '../models/Admin'
-import Orphanage from '../models/Orphanage'
 
 import { sendEmail } from '../modules/sendMail'
 
@@ -21,52 +20,23 @@ class passwordController{
       email: Yup.string().email().required()
     })
 
-    await schema.validate( {email} )
-    
-    const orphanageRepository = getRepository(Orphanage)
-    const orphanage = await orphanageRepository.findOne({ where: { email } })
+    await schema.validate( {email} )    
 
-    if(!orphanage){
-      const adminRepository = getRepository(Admin)
-      const admin = await adminRepository.findOne({ where: { email } })
+    const adminRepository = getRepository(Admin)
+    const admin = await adminRepository.findOne({ where: { email } })
 
-      if(!admin) return res.status(401).json({
-        message: 'User not found'
-      })
+    if(!admin) return res.status(401).json({
+      message: 'User not found'
+    })
 
-      const { name } = admin
-
-      const token = sign(
-        {
-          id: admin.id,
-          email: admin.email
-        },
-        process.env.SECRET_KEY,
-        {
-          expiresIn: 86400
-        }
-      )
-
-      sendEmail({
-        name, 
-        email, 
-        subject: 'Solicitação de redefinição de senha - Happy',
-        message: 'Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.',
-        token, 
-        link: 'http://localhost:3000/app/new-password?key='
-      })
-
-      return res.sendStatus(200)
-    }
-
-    const { name } = orphanage
+    const { name } = admin
 
     const token = sign(
       {
-        id: orphanage.id,
-        email: orphanage.email,
-      }, 
-      process.env.SECRET_KEY, 
+        id: admin.id,
+        email: admin.email
+      },
+      process.env.SECRET_KEY,
       {
         expiresIn: 86400
       }
@@ -80,10 +50,9 @@ class passwordController{
       token, 
       link: 'http://localhost:3000/app/new-password?key='
     })
-    
+
     return res.sendStatus(200)
-    
-  }
+  }    
 
   update = async (req: Request, res: Response) => {      
     const {            
@@ -111,34 +80,19 @@ class passwordController{
       abortEarly: false,
     })  
 
-    if(password !== password_verify){
-      return res.sendStatus(400)
-    }      
+    if(password !== password_verify) return res.sendStatus(400)
 
     try {
       const isTokenValid = verify(token, process.env.SECRET_KEY)    
 
-      if(!isTokenValid){        
-        return res.sendStatus(400)
-      }
+      if(!isTokenValid) return res.sendStatus(400)
 
       const { email } = isTokenValid as TokenProps
       
       const adminRepository = getRepository(Admin)
       const admin = await adminRepository.findOne({ where: { email }})
 
-      if(!admin){
-        const orphanageRepository = getRepository(Orphanage)
-        const orphanage = await orphanageRepository.findOne({ where: { email } })
-
-        if(!orphanage) return res.status(404)
-
-        orphanage.password = password
-        await orphanageRepository.save(orphanage)
-
-        return res.sendStatus(200)
-
-      }
+      if(!admin) return res.status(404)
 
       admin.password = password
       await adminRepository.save(admin)
@@ -147,9 +101,9 @@ class passwordController{
 
     } catch {      
       return res.sendStatus(500)
+
     }
-  }
-  
+  }  
 }
 
 export default new passwordController

@@ -6,7 +6,7 @@ interface UserDataProps{
   subject: string;
   message: string;
   token?: string;
-  link: string;
+  link?: string;
 }
 
 export const sendEmail = (
@@ -39,7 +39,7 @@ export const sendEmail = (
   transport.sendMail({
     from: 'Happy - Admin <noreply@happy.io>',
     to: email,
-    subject: subject,    
+    subject: subject,  
     html: `    
           <html lang="pt-BR">
           <head>
@@ -83,15 +83,18 @@ export const sendEmail = (
           </head>
           <body>                 
             <h1>Happy!</h1>
-            <h2>Olá  ${name}!</h2>
-            <p>${message}</p>
-            <div>
-              ${token ? 
-                `<a href="${link}${token}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
-               : 
-                `<a href="${link}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
-              }
-            </div> 
+            <h2>Olá  ${ name }!</h2>
+            <p>${ message }</p>
+            ${ link ?
+              `<div>
+                ${ token ? 
+                  `<a href="${link}/auth=${token}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
+                 : 
+                  `<a href="${link}" target="_blank" rel="noopnener noreferrer"><span>Clique aqui</span>`
+                }
+              </div>` :
+              null
+            }
           </body>
       </html>  
     `        

@@ -32,6 +32,6 @@ route.delete('/app/orphanages/image/remove/:id', AuthMiddleware, ImagesControlle
 
 route.post('/app/admin/create', AdminController.store)
 
-route.get('/app/authenticate', AuthController.auth)
+route.get('/app/authenticate', AuthController.adminAuth)
 
 export default route

@@ -8,19 +8,7 @@ class Orphanage {
   id: number;
 
   @Column()
-  name: string;
-
-  @Column()
-  email: string;
-  
-  @Column()
-  password: string;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  hashPassword(){
-    this.password = hashSync(this.password, 8)
-  }
+  name: string;  
 
   @Column()
   latitude: number;
@@ -30,6 +18,9 @@ class Orphanage {
 
   @Column()
   about: string;
+
+  @Column()
+  email: string;
 
   @Column()
   whatsapp: number;

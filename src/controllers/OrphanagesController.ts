@@ -8,6 +8,8 @@ import OrphanageImages from '../models/OrphanageImages'
 
 import { sendEmail } from '../modules/sendMail'
 
+import { sign } from 'jsonwebtoken'
+
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
     const orphanagesRepository = getRepository(Orphanage)
@@ -38,22 +40,16 @@ class OrphanagesController{
     const orphanagesRepository = getRepository(Orphanage)
 
     const {
-      name,
-      email,
-      password,
-      password_verify,
+      name,      
       latitude,
       longitude,
       about,
+      email, 
       whatsapp,
       instructions,
       opening_hours,
       open_on_weekends
     } = req.body
-
-    if(password !== password_verify){
-      return res.sendStatus(401)
-    }
 
     // Grava no orphanages_images o filename das imagens que estão sendo upadadas
     const requestImages = req.files as Express.Multer.File[]
@@ -65,11 +61,10 @@ class OrphanagesController{
     
     const data = {
       name,
-      email,
-      password,
       latitude,
       longitude,
       about,
+      email,
       whatsapp,
       instructions,
       opening_hours,
@@ -77,12 +72,11 @@ class OrphanagesController{
       images
     }    
     const schema = Yup.object().shape({
-      name: Yup.string().required(),      
-      email: Yup.string().required(),
-      password: Yup.string().required(),
+      name: Yup.string().required(),  
       latitude: Yup.number().required(),
       longitude: Yup.number().required(),      
       about: Yup.string().required().max(300),
+      email: Yup.string().email().required(),
       whatsapp: Yup.number().required(),
       instructions: Yup.string().required(),
       opening_hours: Yup.string().required(),
@@ -96,11 +90,17 @@ class OrphanagesController{
 
     await schema.validate(data, {
       abortEarly: false,
-    })    
+    })
     
-    const orphanage = orphanagesRepository.create(data)  
-    await orphanagesRepository.save(orphanage)    
-    return res.status(201).json(orphanage)    
+    try {
+      const orphanage = orphanagesRepository.create(data)  
+      await orphanagesRepository.save(orphanage)    
+      return res.status(201).json(orphanage)    
+      
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+    
   }
 
   updateOrphanage = async (req: Request, res: Response) => {    
@@ -114,6 +114,7 @@ class OrphanagesController{
       latitude,
       longitude,
       about,
+      email,
       whatsapp,
       instructions,
       opening_hours,
@@ -128,10 +129,11 @@ class OrphanagesController{
       latitude,
       longitude,
       about,
+      email,
       whatsapp,
       instructions,
       opening_hours,
-      open_on_weekends: open_on_weekends === 'true'       , 
+      open_on_weekends: open_on_weekends === 'true', 
       approved: false,              
     }
 
@@ -157,6 +159,7 @@ class OrphanagesController{
       // An idea to implement perhaps?
       // sendMail(orphanage.email, message) 
       // Send an email to the adminstrator to let him know that the user made changes to the orphanage
+      // This requires refactor the email module
 
       return res.sendStatus(200)      
       
@@ -199,18 +202,24 @@ class OrphanagesController{
     try {
       const orphanage = await orphanagesRepository.findOne(id) 
 
-      if(!orphanage){
-        return res.status(401).json({ message: 'Orphanage not found.'})
-      }      
+      if(!orphanage) return res.status(401).json({ 
+        message: 'Orphanage not found.'
+      })            
 
       const { name, email } = orphanage
+
+      const token = sign(
+        { id },
+        process.env.SECRET_KEY,        
+      )
       
       sendEmail({
         name, 
-        email,         
+        email,  
+        token,               
         subject: `Revise seus dados ${name} - Happy`,
-        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,
-        link: `http://localhost:3000/app/dashboard/orphanage/edit/${id}`
+        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,                
+        link: `http://localhost:3000/app/dashboard/orphanage/edit/${id}`,    
       })
       return res.sendStatus(200)  
 
@@ -226,9 +235,10 @@ class OrphanagesController{
 
     try {
       const orphanage = await orphanagesRepository.findOne(id) 
-      if(!orphanage){
-        return res.status(401).json({ message: 'Orphanage not found.'})
-      }
+      
+      if(!orphanage) return res.status(401).json({ 
+        message: 'Orphanage not found.'
+      })
 
       await orphanagesRepository.remove(orphanage)
     
