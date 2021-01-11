@@ -1,17 +1,28 @@
 import { getRepository } from "typeorm"
 import Orphanage from "../../models/Orphanage"
 
+interface OrphanageProps{
+  id: number;
+}
+
 class OrphanageShowService {
-  execute = async({ id  }) => {
-    const orphanagesRepository = getRepository(Orphanage)    
+  execute = async(id: OrphanageProps) => {
+    const orphanagesRepository = getRepository(Orphanage)  
     
-    const orphanage = await orphanagesRepository.findOne(id, {
-      relations: ['images']
-    })    
+    try {
+      const orphanage = await orphanagesRepository.findOne(id, {
+        relations: ['images']
+      })    
 
-    if(!orphanage) return null
+      if(!orphanage) throw new Error('Orphanage not found.')
 
-    return orphanage
+      return orphanage
+      
+    } catch (error) {
+      throw Error(error.message)
+      
+    }
+
   }
 }
 

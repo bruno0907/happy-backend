@@ -1,48 +1,43 @@
 import { Request, Response } from 'express'
-import { getManager, getRepository } from 'typeorm'
 import orphanageView from '../views/orphanages_view'
 import * as Yup from 'yup'
-
-import Orphanage from '../models/Orphanage'
-import OrphanageImages from '../models/OrphanageImages'
-
-import { sendEmail } from '../modules/sendMail'
-
-import { sign } from 'jsonwebtoken'
 
 import OrphanagesIndexService from '../services/orphanagesServices/OrphanagesIndexService'
 import OrphanageShowService from '../services/orphanagesServices/OrphanageShowService'
 import OrphanageStoreService from '../services/orphanagesServices/OrphanageStoreService'
 import OrphanageUpdateService from '../services/orphanagesServices/OrphanageUpdateService'
 import OrphanageApprovalService from '../services/orphanagesServices/OrphanageApprovalService'
+import OrphanageRejectionService from '../services/orphanagesServices/OrphanageRejectionService'
+import OrphanageDeleteService from '../services/orphanagesServices/OrphanageDeleteService'
 
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
     try {
       const orphanages = await OrphanagesIndexService.execute()
-      
-      if(!orphanages) return res.sendStatus(404)
-      
       return res.status(200).json(orphanageView.renderMany(orphanages))
+
     } catch (error) {
-      return res.status(500).json({ error: error.message })
+      return res.status(400).json({ 
+        status: 400,
+        error: error.message 
+      })
 
     }
-
   }
 
   show = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const data = req.params
+    const id = Number(data.id)    
 
     try{
-      const orphanage = await OrphanageShowService.execute({ id })    
-      
-      if(!orphanage) return res.sendStatus(404)
-
+      const orphanage = await OrphanageShowService.execute({ id })                
       return res.status(200).json(orphanageView.render(orphanage))
 
     }catch(error){
-      return res.status(500).json(error)
+      return res.status(404).json({
+        status: 404,
+        message: error.message
+      })
 
     }  
 
@@ -107,7 +102,10 @@ class OrphanagesController{
       return res.status(200).json(orphanage)
       
     } catch (error) {
-      return res.status(400).json(error.message)
+      return res.status(400).json({
+        status: 400,
+        error: error.message
+      })
     }
     
   }
@@ -148,82 +146,66 @@ class OrphanagesController{
       return res.sendStatus(200)
       
     } catch (error) {
-      return res.status(400).json(error.message)
+      return res.status(400).json({
+        status: 400,
+        error: error.message
+      })
 
     }
     
   }
 
-  approveOrphanage = async (req: Request, res: Response) => {      
-
+  approveOrphanage = async (req: Request, res: Response) => {  
     const {
       approved
     } = req.body 
       
-    const { id } = req.params    
+    const data = req.params    
+    const id = Number(data.id)
 
     try {
-      await OrphanageApprovalService.execute({ id, approved }) 
+      await OrphanageApprovalService.execute({id, approved})   
       return res.sendStatus(200)
-
-
+      
     } catch (error) {
-      return res.status(500).json({ error: error.message })
+      return res.status(400).json({ 
+        status: 400,
+        error: error.message 
+      })
     }    
   }
 
   rejectOrphanage = async (req: Request, res: Response) => {  
-    const orphanagesRepository = getRepository(Orphanage)    
+    const data = req.params  
+    const id = Number(data.id)
     
-    const { id } = req.params
-
     try {
-      const orphanage = await orphanagesRepository.findOne(id) 
-
-      if(!orphanage) return res.status(401).json({ 
-        message: 'Orphanage not found.'
-      })            
-
-      const { name, email } = orphanage
-
-      const token = sign(
-        { id },
-        process.env.SECRET_KEY,        
-      )
-      
-      sendEmail({
-        name, 
-        email,  
-        token,               
-        subject: `Revise seus dados ${name} - Happy`,
-        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,                
-        link: `http://localhost:3000/app/dashboard/orphanage/edit/${id}`,    
-      })
-      return res.sendStatus(200)  
+      await OrphanageRejectionService.execute({id})
+      return res.sendStatus(200)      
 
     } catch (error) {
-      return res.status(500).json({ error: error.message })
-    }    
-  }
-  
-  deleteOrphanage = async (req: Request, res: Response) => {
-    const orphanagesRepository = getRepository(Orphanage)   
-    
-    const { id } = req.params   
-
-    try {
-      const orphanage = await orphanagesRepository.findOne(id) 
-      
-      if(!orphanage) return res.status(401).json({ 
-        message: 'Orphanage not found.'
+      return res.status(404).json({ 
+        status: 404,
+        error: error.message 
       })
 
-      await orphanagesRepository.remove(orphanage)
-    
+    }  
+
+  }
+  
+  deleteOrphanage = async (req: Request, res: Response) => {        
+    const data = req.params   
+    const id = Number(data.id)
+
+    try {  
+      await OrphanageDeleteService.execute({ id })     
       return res.sendStatus(200)
 
     } catch (error) {      
-      return res.status(500).json({ error: error.message })
+      return res.status(400).json({ 
+        status: 400,
+        error: error.message 
+      })
     }
   }  
 }

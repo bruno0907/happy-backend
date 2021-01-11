@@ -2,7 +2,7 @@ import { getRepository } from 'typeorm'
 
 import Orphanage from '../../models/Orphanage'
 
-interface OrphanageProps{
+interface OrphanageProps{  
   name: string;
   latitude: number;
   longitude: number;
@@ -11,13 +11,13 @@ interface OrphanageProps{
   whatsapp: number;
   instructions: string;
   opening_hours: string;
-  open_on_weekends: boolean;
+  open_on_weekends: boolean;  
   images: Array<{
     path: string;
-  }>;
+  }>;  
 }
 
-class OrphanageStoreService {
+class OrphanageStoreService{
   execute = async(data: OrphanageProps) => {
     const orphanagesRepository = getRepository(Orphanage)  
     

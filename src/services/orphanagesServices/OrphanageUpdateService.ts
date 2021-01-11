@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import Orphanage from '../../models/Orphanage'
 import OrphanageImages from '../../models/OrphanageImages'
 
-interface UpdateOrphanageProps{
+interface OrphanageProps{
   id: number;
   name: string;
   latitude: number;
@@ -14,13 +14,12 @@ interface UpdateOrphanageProps{
   whatsapp: number;
   instructions: string;
   opening_hours: string;
-  open_on_weekends: boolean;
-  approved: boolean;
+  open_on_weekends: boolean;  
 }
 
 class OrphanageUpdateService {
   execute = async(
-    data: UpdateOrphanageProps, 
+    data: OrphanageProps, 
     requestImages: Express.Multer.File[]
   ) => {
     
@@ -64,41 +63,14 @@ class OrphanageUpdateService {
           await imagesRepository.save(images)
         }
       )
+      // Add an sendEmail to the admin informing the edit of the orphanage by the owner and requestion revision
+
       return
       
     } catch (error) {
       throw new Error(error.message)
-    }  
 
-    // try {      
-    //   const orphanage = await orphanagesRepository.preload(data)
-
-    //   if(!orphanage){
-    //     return res.status(401).json({ error: 'Orphanage not found.'})
-    //   }            
-
-    //   const images = requestImages.map(image => {
-    //     return {           
-    //       path: image.filename,
-    //       orphanage
-    //     }
-    //   })   
-      
-    //   await getManager().transaction(async orphanagesRepository => {
-    //     await orphanagesRepository.save(orphanage)
-    //     await imagesRepository.save(images)
-    //   })
-
-    //   // An idea to implement perhaps?
-    //   // sendMail(orphanage.email, message) 
-    //   // Send an email to the adminstrator to let him know that the user made changes to the orphanage
-    //   // This requires refactor the email module
-
-    //   return res.sendStatus(200)      
-      
-    // } catch (error) {
-    //   return res.status(500).json(error)
-    // }  
+    }     
     
   }
 }
