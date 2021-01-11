@@ -1,6 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, } from 'typeorm'
 import OrphanageImages from './OrphanageImages'
-import { hashSync } from 'bcryptjs'
+
 
 @Entity('orphanages')
 class Orphanage {

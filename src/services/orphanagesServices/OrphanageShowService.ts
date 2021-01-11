@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm"
-import Orphanage from "../models/Orphanage"
+import Orphanage from "../../models/Orphanage"
 
 class OrphanageShowService {
   execute = async({ id  }) => {

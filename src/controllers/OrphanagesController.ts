@@ -10,8 +10,11 @@ import { sendEmail } from '../modules/sendMail'
 
 import { sign } from 'jsonwebtoken'
 
-import OrphanagesIndexService from '../services/OrphanagesIndexService'
-import OrphanageShowService from '../services/OrphanageShowService'
+import OrphanagesIndexService from '../services/orphanagesServices/OrphanagesIndexService'
+import OrphanageShowService from '../services/orphanagesServices/OrphanageShowService'
+import OrphanageStoreService from '../services/orphanagesServices/OrphanageStoreService'
+import OrphanageUpdateService from '../services/orphanagesServices/OrphanageUpdateService'
+import OrphanageApprovalService from '../services/orphanagesServices/OrphanageApprovalService'
 
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
@@ -39,15 +42,13 @@ class OrphanagesController{
       return res.status(200).json(orphanageView.render(orphanage))
 
     }catch(error){
-      return res.status(500).json({ error: error.message })
+      return res.status(500).json(error)
 
     }  
 
   }
 
   store = async (req: Request, res: Response) => {  
-    const orphanagesRepository = getRepository(Orphanage)
-
     const {
       name,      
       latitude,
@@ -60,14 +61,13 @@ class OrphanagesController{
       open_on_weekends
     } = req.body
 
-    // Grava no orphanages_images o filename das imagens que estão sendo upadadas
     const requestImages = req.files as Express.Multer.File[]
     const images = requestImages.map(image => {
       return { 
         path: image.filename 
       }
-    })   
-    
+    })  
+
     const data = {
       name,
       latitude,
@@ -79,7 +79,8 @@ class OrphanagesController{
       opening_hours,
       open_on_weekends: open_on_weekends === 'true',
       images
-    }    
+    }   
+
     const schema = Yup.object().shape({
       name: Yup.string().required(),  
       latitude: Yup.number().required(),
@@ -94,28 +95,24 @@ class OrphanagesController{
         Yup.object().shape({
           path: Yup.string().required()
         })
-      )
-    })
-
-    await schema.validate(data, {
-      abortEarly: false,
+        )
+      })
+      
+      await schema.validate(data, {
+        abortEarly: false,      
     })
     
     try {
-      const orphanage = orphanagesRepository.create(data)  
-      await orphanagesRepository.save(orphanage)    
-      return res.status(201).json(orphanage)    
+      const orphanage = OrphanageStoreService.execute(data)      
+      return res.status(200).json(orphanage)
       
     } catch (error) {
-      return res.status(500).json({ error: error.message })
+      return res.status(400).json(error.message)
     }
     
   }
 
   updateOrphanage = async (req: Request, res: Response) => {    
-    const orphanagesRepository = getRepository(Orphanage)
-    const imagesRepository = getRepository(OrphanageImages)
-
     const { id } = req.params      
 
     const {
@@ -144,59 +141,31 @@ class OrphanagesController{
       opening_hours,
       open_on_weekends: open_on_weekends === 'true', 
       approved: false,              
-    }
+    }  
 
-    try {      
-      const orphanage = await orphanagesRepository.preload(data)
-
-      if(!orphanage){
-        return res.status(401).json({ error: 'Orphanage not found.'})
-      }            
-
-      const images = requestImages.map(image => {
-        return {           
-          path: image.filename,
-          orphanage
-        }
-      })   
-      
-      await getManager().transaction(async orphanagesRepository => {
-        await orphanagesRepository.save(orphanage)
-        await imagesRepository.save(images)
-      })
-
-      // An idea to implement perhaps?
-      // sendMail(orphanage.email, message) 
-      // Send an email to the adminstrator to let him know that the user made changes to the orphanage
-      // This requires refactor the email module
-
-      return res.sendStatus(200)      
+    try {
+      await OrphanageUpdateService.execute(data, requestImages)  
+      return res.sendStatus(200)
       
     } catch (error) {
-      return res.status(500).json(error)
-    }  
+      return res.status(400).json(error.message)
+
+    }
+    
   }
 
-  approveOrphanage = async (req: Request, res: Response) => {  
-    const orphanagesRepository = getRepository(Orphanage)
+  approveOrphanage = async (req: Request, res: Response) => {      
 
     const {
       approved
     } = req.body 
-    
-    const { id } = req.params
+      
+    const { id } = req.params    
 
     try {
-      const orphanage = await orphanagesRepository.findOne(id) 
+      await OrphanageApprovalService.execute({ id, approved }) 
+      return res.sendStatus(200)
 
-      if(!orphanage){
-        return res.status(401).json({ message: 'Orphanage not found.'})
-      }
-  
-      orphanage.approved = approved
-  
-      await orphanagesRepository.save(orphanage)    
-      return res.sendStatus(200)  
 
     } catch (error) {
       return res.status(500).json({ error: error.message })
