@@ -1,13 +1,9 @@
 import { Request, Response } from 'express'
-import { getRepository } from 'typeorm'
-import * as Yup from 'yup'
 
-import Admin from '../models/Admin'
+import AdminStoreService from '../services/adminServices/AdminStoreService'
 
 class AdminController{
   store = async (req: Request, res: Response) => {  
-    const adminRepository = getRepository(Admin) 
-
     const {
       name,
       email,
@@ -17,7 +13,9 @@ class AdminController{
     } = req.body
 
     if(password !== password_verify){
-      return res.status(401).json({ error: 'Passwords dont match'})
+      return res.status(401).json({ 
+        code: 401,
+        error: 'Passwords dont match'})
     }     
 
     const data = {
@@ -27,23 +25,18 @@ class AdminController{
       isAdmin  
     }    
 
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),      
-      email: Yup.string().required(),
-      password: Yup.string().required(),  
-      isAdmin: Yup.boolean().required()
-    })
+    try {
+      const admin = await AdminStoreService.execute(data)
+      return res.status(200).json(admin)
 
-    await schema.validate(data, {
-      abortEarly: false,
-    })
-  
-    const admin = adminRepository.create(data)  
-    await adminRepository.save(admin)    
+    } catch (error) {
+      return res.status(400).json({
+        status: 400,
+        error: error.message
+      })
 
-    delete admin.password
+    }
 
-    return res.status(201).json(admin)    
   }   
 }
 

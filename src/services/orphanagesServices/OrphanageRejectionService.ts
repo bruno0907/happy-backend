@@ -1,7 +1,8 @@
-import { sign } from "jsonwebtoken"
 import { getRepository } from "typeorm"
 import Orphanage from "../../models/Orphanage"
-import { sendEmail } from "../../modules/sendMail"
+import Email from "../../modules/sendMail"
+
+import * as jwt from '../../config/jwt'
 
 interface OrphanageProps{
   id: number;
@@ -16,21 +17,22 @@ class OrphanageRejectionService{
       
       if(!orphanage) throw new Error('Orphanage not found.')
 
-      const { name, email } = orphanage
+      const { name, email } = orphanage      
 
-      const token = sign(
-        { id, name, email },
-        process.env.SECRET_KEY,        
-      )
-      
-      sendEmail({
-        name, 
-        email,  
-        token,               
+      const payload = { id, name, email }
+      const token = jwt.sign(payload, 86400)
+
+      // Save on DB the orphanage token for authentication safety
+
+      const rejectionEmail = new Email({
+        name,
+        email,        
         subject: `Revise seus dados ${name} - Happy`,
-        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,                
-        link: `http://localhost:3000/app/dashboard/orphanage/edit/${id}`,    
+        message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,
+        link: `${process.env.APP_URL}/app/dashboard/orphanage/edit/auth=${token}`,
       })
+      rejectionEmail.send()      
+      
       return
 
     } catch (error) {

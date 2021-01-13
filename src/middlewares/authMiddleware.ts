@@ -1,27 +1,36 @@
 import { NextFunction, Request, Response } from 'express'
 import { verify } from 'jsonwebtoken'
+import * as jwt from '../config/jwt'
 
 export default function AuthMiddleware(req: Request, res: Response, next: NextFunction){  
-  try {
-    const { authorization } = req.headers
-    if(!authorization){
-      return res.status(401).json({ message: 'Authorization not found.'})
-    }
+  const { authorization } = req.headers  
+  
+  if(!authorization) return res.status(401).json({
+    status: 401,
+    error: 'Authorization not found.'
+  })      
 
-    const token = authorization.replace('Bearer', '').trim()        
-    if(!token){
-      return res.status(401).json({ message: 'Token is missing.'})
-    }    
+  try {    
+    const token = authorization.replace('Bearer', '').trim() 
     
-    const isValidToken = verify(token, process.env.SECRET_KEY)    
-    if(!isValidToken){      
-      return res.status(401).json({ message: 'Invalid/Expired Token.'})
-    }        
+    if(!token) return res.status(401).json({
+      status: 401,
+      error: 'Token is missing.'
+    })
+    
+    const isValidToken = jwt.verify(token)    
+    if(!isValidToken) return res.status(401).json({
+      status: 401,
+      error: 'Invalid/Expired Token.'
+    })
   
     next()
     
   } catch (error) {
-    res.status(401).json(error)
-    
+    return res.status(401).json({ 
+      status: 401,
+      error: error.message 
+    })
+
   }
 }
