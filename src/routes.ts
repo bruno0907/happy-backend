@@ -20,18 +20,18 @@ route.get('/orphanages', OrphanagesController.index)
 route.get('/orphanages/:id', OrphanagesController.show)
 route.post('/orphanages', upload.array('images'), OrphanagesController.store)
 
-route.post('/app/admin/password-recovery', PasswordController.index)
-route.patch('/app/admin/new-password', AuthMiddleware, PasswordController.update)
+route.post('/password-recovery', PasswordController.index)
+route.patch('/new-password', AuthMiddleware, PasswordController.update)
 
-route.patch('/app/orphanages/approve/:id', AuthMiddleware, OrphanagesController.approveOrphanage)
-route.get('/app/orphanages/reject/:id', AuthMiddleware, OrphanagesController.rejectOrphanage)
-route.patch('/app/orphanages/update/:id', AuthMiddleware, upload.array('images'), OrphanagesController.updateOrphanage)
-route.delete('/app/orphanages/delete/:id', AuthMiddleware, OrphanagesController.deleteOrphanage)
+route.patch('/orphanages/approve/:id', AuthMiddleware, OrphanagesController.approveOrphanage)
+route.get('/orphanages/reject/:id', AuthMiddleware, OrphanagesController.rejectOrphanage)
+route.patch('/orphanages/update/:id', AuthMiddleware, upload.array('images'), OrphanagesController.updateOrphanage)
+route.delete('/orphanages/delete/:id', AuthMiddleware, OrphanagesController.deleteOrphanage)
 
-route.delete('/app/orphanages/image/remove/:id', AuthMiddleware, ImagesController.removeOrphanageImage)
+route.delete('/orphanages/image/remove/:id', AuthMiddleware, ImagesController.removeOrphanageImage)
 
-route.post('/app/admin/create', AdminController.store)
+route.post('/admin/create', AdminController.store)
 
-route.get('/app/authenticate', AuthController.adminAuth)
+route.get('/sign-in', AuthController.auth)
 
 export default route

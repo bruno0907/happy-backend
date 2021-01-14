@@ -37,6 +37,9 @@ class Orphanage {
   @Column()
   approved: boolean;
 
+  @Column()
+  token: string;
+
   @OneToMany(() => OrphanageImages, image => image.orphanage, {
     cascade: ["insert", "update", "remove"], 
   })

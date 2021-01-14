@@ -18,11 +18,15 @@ class Admin {
   @Column()
   isAdmin: boolean;
 
+  @Column()
+  token: string;
+  
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword(){
     this.password = hashSync(this.password, 8)
   }
 }
+
 
 export default Admin

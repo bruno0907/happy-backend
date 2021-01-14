@@ -31,9 +31,14 @@ export class createAdmin1603219719712 implements MigrationInterface {
                         name: 'isAdmin',
                         type: 'boolean'
                       },
+                      {
+                        name: 'token',
+                        type: 'varchar',
+                        isNullable: true
+                      }
                 ]
             })
-        )
+        )        
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

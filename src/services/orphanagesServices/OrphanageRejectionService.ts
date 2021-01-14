@@ -29,7 +29,7 @@ class OrphanageRejectionService{
         email,        
         subject: `Revise seus dados ${name} - Happy`,
         message: `Infelizmente seu cadastro não foi aprovado. Acesse o link abaixo para revisar seus dados e encaminhe novamente seu registro.`,
-        link: `${process.env.APP_URL}/app/dashboard/orphanage/edit/auth=${token}`,
+        link: `${process.env.APP_URL}/dashboard/orphanage/edit/auth=${token}`,
       })
       rejectionEmail.send()      
       

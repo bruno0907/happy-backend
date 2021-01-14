@@ -1,6 +1,7 @@
 import { compare } from "bcryptjs"
-import { sign } from "jsonwebtoken"
 import { getRepository } from "typeorm"
+
+import * as jwt from '../../config/jwt'
 
 import Admin from "../../models/Admin"
 
@@ -19,21 +20,17 @@ class AdminAuthService{
   
     const isValidPassword = await compare(password, admin.password)
 
-    if (!isValidPassword) throw new Error('Username or password not found!')
-
-    const token = sign(
-      { id: admin.id }, // Payload (informações a serem armazenadas do usuário dentro do token)
-      process.env.SECRET_KEY, // Secret key de decrypt do token 
-      { expiresIn: 86400 } // tempo de duração do token
-    )    
+    if (!isValidPassword) throw new Error('Username or password not found!')    
 
     delete admin.password
 
-    return { 
+    const payload = { admin }
+    const token = jwt.sign(payload, 86400)    
+
+    return {
       admin,
       token
     }
-
   }
 
 }
