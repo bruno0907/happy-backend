@@ -176,11 +176,10 @@ class OrphanagesController{
   }
 
   rejectOrphanage = async (req: Request, res: Response) => {  
-    const data = req.params  
-    const id = Number(data.id)
-    
+    const { id } = req.params
+
     try {
-      await OrphanageRejectionService.execute({id})
+      await OrphanageRejectionService.execute(id)
       return res.sendStatus(200)      
 
     } catch (error) {

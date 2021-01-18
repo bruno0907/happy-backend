@@ -17,4 +17,4 @@ app.use(route)
 app.use(process.env.STORAGE_URL, express.static(path.join(__dirname, '..', 'tmp', 'uploads')))
 app.use(errorHandler);
 
-app.listen(port, () => console.log(`Server running on http://localhost:${port} address`))
+app.listen(port, () => console.log(`Server ON and running @ http://localhost:${port}`))

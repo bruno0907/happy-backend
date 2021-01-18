@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-import { verify } from 'jsonwebtoken'
 import * as jwt from '../config/jwt'
 
 export default function AuthMiddleware(req: Request, res: Response, next: NextFunction){  

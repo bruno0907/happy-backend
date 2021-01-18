@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
 
-import AdminAuthService from '../services/authServices/AuthService'
+import AdminAuthService from '../services/adminServices/AdminAuthService'
+import OrphanageAuthService from '../services/orphanagesServices/OrphanageAuthService'
 
 class AuthController{
-  auth = async(req: Request, res: Response) => {
+  adminAuth = async(req: Request, res: Response) => {
     const { authorization } = req.headers
     const credentials = Buffer.from(authorization.replace('Basic', '').trim(), 'base64').toString()
     const [username, password] = credentials.split(':')
@@ -21,8 +22,24 @@ class AuthController{
         error: error.message
       })
     }
-  }  
+  }
+  
+  orphanageAuth = async(req: Request, res: Response) => {    
+    const { id, authorization } = req.headers    
+    const token = authorization.replace('Bearer', '').trim()
+    
+    try {
+      await OrphanageAuthService.execute({id, token})
+      return res.sendStatus(200)    
+      
+    } catch (error) {
+      return res.status(400).json({
+        status: 400,
+        message: error.message
+      })
 
+    }
+  }
 }
 
 export default new AuthController

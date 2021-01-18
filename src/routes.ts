@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 import multer from 'multer'
 import uploadConfig from './config/upload'
@@ -16,6 +16,8 @@ import AuthMiddleware from './middlewares/authMiddleware'
 const route = Router()
 const upload = multer(uploadConfig)
 
+route.get('/authenticate', AuthMiddleware, (req: Request, res: Response) => res.sendStatus(200))
+
 route.get('/orphanages', OrphanagesController.index)
 route.get('/orphanages/:id', OrphanagesController.show)
 route.post('/orphanages', upload.array('images'), OrphanagesController.store)
@@ -32,6 +34,7 @@ route.delete('/orphanages/image/remove/:id', AuthMiddleware, ImagesController.re
 
 route.post('/admin/create', AdminController.store)
 
-route.get('/sign-in', AuthController.auth)
+route.get('/sign-in', AuthController.adminAuth)
+route.get('/me', AuthMiddleware, AuthController.orphanageAuth)
 
 export default route
