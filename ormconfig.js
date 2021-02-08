@@ -6,8 +6,10 @@ module.exports = {
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
   ssl: true,
-  extra: {    
-    rejectUnauthorized: false,
+  extra: { 
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
   entities: [
     process.env.TYPEORM_ENTITIES
