@@ -29,9 +29,7 @@ class AdminStoreService {
       const admin = adminRepository.create(data)  
       await adminRepository.save(admin)
       
-      if(!admin) throw new Error('And error has ocurried while creating a new register.')
-
-      delete admin.password
+      if(!admin) throw new Error('And error has ocurried while creating a new register.')      
 
       return admin
       

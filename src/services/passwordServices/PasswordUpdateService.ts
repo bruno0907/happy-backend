@@ -39,7 +39,7 @@ class PasswordUpdateService{
       
       if(password !== password_verify) throw new Error('Passwords dont match')
 
-      const { email } = verify(token, process.env.SECRET_KEY) as TokenProps 
+      const { email } = verify(token, String(process.env.SECRET_KEY)) as TokenProps 
       
       const adminRepository = getRepository(Admin)
       const admin = await adminRepository.findOne({ where: { email }})

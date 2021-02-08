@@ -14,7 +14,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 app.use(route)
-app.use(process.env.STORAGE_URL, express.static(path.join(__dirname, '..', 'tmp', 'uploads')))
+app.use(String(process.env.STORAGE_URL), express.static(path.join(__dirname, '..', 'tmp', 'uploads')))
 app.use(errorHandler);
 
 app.listen(port, () => console.log(`Server ON and running @ http://localhost:${port}`))

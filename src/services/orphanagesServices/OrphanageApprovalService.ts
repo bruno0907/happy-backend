@@ -12,13 +12,16 @@ class OrphanageApprovalService{
 
     try {
       const orphanage = await orphanagesRepository.findOne(id)
+
+      if(!orphanage) throw new Error('Orphanage not found')
+
       orphanage.approved = approved
 
-      await orphanagesRepository.save(orphanage)    
+      await orphanagesRepository?.save(orphanage)    
       return
 
     } catch (error) {
-      throw Error('Orphanage not found.')
+      throw Error(error.message)
     }    
   }
 }

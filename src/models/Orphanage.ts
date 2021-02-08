@@ -5,46 +5,46 @@ import OrphanageImages from './OrphanageImages'
 @Entity('orphanages')
 class Orphanage {
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;  
+  name!: string;  
 
   @Column()
-  latitude: number;
+  latitude!: number;
 
   @Column()
-  longitude: number;
+  longitude!: number;
 
   @Column()
-  about: string;
+  about!: string;
 
   @Column()
-  email: string;
+  email!: string;
 
   @Column()
-  whatsapp: number;
+  whatsapp!: number;
 
   @Column()
-  instructions: string;
+  instructions!: string;
 
   @Column()
-  opening_hours: string;
+  opening_hours!: string;
 
   @Column()
-  open_on_weekends: boolean;
+  open_on_weekends!: boolean;
 
   @Column()
-  approved: boolean;
+  approved!: boolean;
 
   @Column()
-  token: string;
+  token!: string;
 
   @OneToMany(() => OrphanageImages, image => image.orphanage, {
-    cascade: ["insert", "update", "remove"], 
+    cascade!: ["insert", "update", "remove"], 
   })
   @JoinColumn({ name: 'orphanage_id'})
-  images: OrphanageImages[];
+  images!: OrphanageImages[];
 }
 
 export default Orphanage

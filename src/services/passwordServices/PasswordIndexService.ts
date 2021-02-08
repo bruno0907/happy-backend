@@ -6,6 +6,8 @@ import * as Yup from 'yup'
 import Admin from "../../models/Admin"
 import Email from "../../modules/sendMail"
 
+const APP_URL = process.env.APP_URL
+
 class PasswordIndexService{  
   
   execute = async(email: string) => {
@@ -32,15 +34,16 @@ class PasswordIndexService{
         email, 
         subject: 'Solicitação de redefinição de senha - Happy',
         message: 'Então você esqueceu sua senha? Não tem problema! Clique no link abaixo e você será redirecionado para redefinir sua senha.',        
-        link: `http://localhost:3000/app/new-password?key=${token}`
+        link: `${APP_URL}/new-password?key=${token}`
       })
       newPasswordEmail.send()
+
+      return
       
     } catch (error) {
       throw Error(error.message)
       
-    }
-    return
+    }  
 
   }
 }

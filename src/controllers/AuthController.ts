@@ -6,6 +6,9 @@ import OrphanageAuthService from '../services/orphanagesServices/OrphanageAuthSe
 class AuthController{
   adminAuth = async(req: Request, res: Response) => {
     const { authorization } = req.headers
+
+    if(!authorization) throw new Error('Authorization not found')
+    
     const credentials = Buffer.from(authorization.replace('Basic', '').trim(), 'base64').toString()
     const [username, password] = credentials.split(':')
 
@@ -26,7 +29,7 @@ class AuthController{
   
   orphanageAuth = async(req: Request, res: Response) => {    
     const { id, authorization } = req.headers    
-    const token = authorization.replace('Bearer', '').trim()
+    const token = authorization?.replace('Bearer', '').trim()
     
     try {
       await OrphanageAuthService.execute({id, token})

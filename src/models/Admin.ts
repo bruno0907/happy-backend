@@ -4,22 +4,22 @@ import { hashSync } from 'bcryptjs'
 @Entity('admin')
 class Admin {
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  email: string;
+  email!: string;
   
   @Column()
-  password: string;
+  password!: string;
 
   @Column()
-  isAdmin: boolean;
+  isAdmin!: boolean;
 
   @Column()
-  token: string;
+  token!: string;
   
   @BeforeInsert()
   @BeforeUpdate()

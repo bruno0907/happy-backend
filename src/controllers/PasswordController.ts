@@ -12,8 +12,7 @@ class passwordController{
       return res.sendStatus(200)
 
     } catch (error) {
-      return res.status(400).json({
-        status: 400,
+      return res.status(400).json({        
         error: error.message
       })
 
@@ -27,7 +26,10 @@ class passwordController{
     } = req.body   
     
     const { authorization } = req.headers
-    const token = authorization.replace('Bearer', '').trim()    
+
+    if(!authorization) throw new Error('Authorization not found')
+    
+    const token = authorization?.replace('Bearer', '').trim()    
 
     try {
       await PasswordUpdateService.execute({

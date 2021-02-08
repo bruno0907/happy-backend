@@ -31,28 +31,28 @@ const storageTypes = {
         cb(null, fileName)
       })
     }
-  }),
+  // }),
 
-  s3: multerS3({
-    s3: new aws.S3(),
-    bucket: process.env.BUCKET_NAME,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    acl: 'public-read',
-    key: (req, file, cb) => {
-      crypto.randomBytes(16, (err, hash) => {
-        if(err){
-          return cb(err)
-        }
-        const fileName = `${hash.toString('hex')}-${file.originalname}`
-        cb(null, fileName)
-      })
-    }
+  // s3: multerS3({
+  //   s3: new aws.S3(),
+  //   bucket: String(process.env.BUCKET_NAME),
+  //   contentType: multerS3.AUTO_CONTENT_TYPE,
+  //   acl: 'public-read',
+  //   key: (req, file, cb) => {
+  //     crypto.randomBytes(16, (err, hash) => {
+  //       if(err){
+  //         return cb(err)
+  //       }
+  //       const fileName = `${hash.toString('hex')}-${file.originalname}`
+  //       cb(null, fileName)
+  //     })
+  //   }
   })
 }
 
 export default {
   dest: path.resolve(__dirname, '..', '..', 'tmp', 'uploads'),
-  storage: storageTypes[process.env.STORAGE_TYPE],
+  storage: storageTypes.local,
   limits: {
     fileSize: MAX_SIZE_TWO_MEGABYTES,    
   },  
@@ -63,11 +63,6 @@ export default {
       'image/gif'
     ]
 
-    if(allowedMimes.includes(file.mimetype)){
-      cb(null, true)
-    } else {
-      cb(new Error('Invalid file type'), true)
-      // throw new Error('Invalid file type')
-    }
+    allowedMimes.includes(file.mimetype) && cb(new Error('Upload Error'), true)
   }
 }

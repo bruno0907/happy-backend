@@ -5,7 +5,7 @@ interface Email{
   email: string;
   subject: string;
   message: string;    
-  link: string;
+  link?: string;
 }
 
 interface EmailProps{  
@@ -29,8 +29,8 @@ class Email{
   send(){
     try {        
       const transport = nodemailer.createTransport({
-        host: process.env.NODEMAILER_HOST,
-        port: process.env.NODEMAILER_PORT,
+        host: 'smtp.mailtrap.io',
+        port: 2525,
         auth: {
           user: process.env.NODEMAILER_USER,
           pass: process.env.NODEMAILER_PASS,
