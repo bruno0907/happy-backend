@@ -20,15 +20,12 @@ class AdminAuthService{
   
     const isValidPassword = await compare(password, admin.password)
 
-    if (!isValidPassword) throw new Error('Username or password not found!')        
+    if (!isValidPassword) throw new Error('Username or password not found!')
 
-    const payload = { admin }
+    const payload = { username, password }
     const token = jwt.sign(payload, 86400)    
 
-    return {
-      admin,
-      token
-    }
+    return token
   }
 
 }

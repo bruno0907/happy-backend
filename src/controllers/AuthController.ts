@@ -20,10 +20,7 @@ class AuthController{
       return res.status(202).json(response)
       
     } catch (error) {
-      return res.status(400).json({
-        status: 400,
-        error: error.message
-      })
+      return res.status(400).json({ error: error.message })
     }
   }
   
@@ -36,10 +33,7 @@ class AuthController{
       return res.sendStatus(200)    
       
     } catch (error) {
-      return res.status(400).json({
-        status: 400,
-        message: error.message
-      })
+      return res.status(400).json({ message: error.message })
 
     }
   }

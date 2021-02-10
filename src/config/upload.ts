@@ -56,13 +56,17 @@ export default {
   limits: {
     fileSize: MAX_SIZE_TWO_MEGABYTES,    
   },  
-  fileFilter: (req: Request, file: { mimetype: string } , cb: (arg0: Error, arg1: boolean) => void) => {
+  fileFilter: (req: Request, file: { mimetype: string } , cb: (arg0: Error | null, arg1?: boolean) => void) => {
     const allowedMimes = [
       'image/jpeg',
       'image/png',
       'image/gif'
     ]
-
-    allowedMimes.includes(file.mimetype) && cb(new Error('Upload Error'), true)
+    
+    if(allowedMimes.includes(file.mimetype)){
+      cb(null, true)
+    } else {
+      cb(new Error('Invalid file type'))
+    }
   }
 }
