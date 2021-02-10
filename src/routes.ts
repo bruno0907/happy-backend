@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 
 import multer from 'multer'
-import uploadConfig from './config/upload'
+import uploadConfig from './config/multer'
 
 import OrphanagesController from './controllers/OrphanagesController'
 

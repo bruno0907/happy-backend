@@ -10,6 +10,8 @@ import OrphanageApprovalService from '../services/orphanagesServices/OrphanageAp
 import OrphanageRejectionService from '../services/orphanagesServices/OrphanageRejectionService'
 import OrphanageDeleteService from '../services/orphanagesServices/OrphanageDeleteService'
 
+import cloudinary from '../config/cloudinary'
+
 class OrphanagesController{
   index = async (req: Request, res: Response) => {
     try {
@@ -57,11 +59,11 @@ class OrphanagesController{
     } = req.body
 
     const requestImages = req.files as Express.Multer.File[]
-    const images = requestImages.map(image => {
+    const images = requestImages.map(image => {       
       return { 
         path: image.filename 
       }
-    })  
+    })
 
     const data = {
       name,
@@ -98,7 +100,7 @@ class OrphanagesController{
     })
     
     try {
-      const orphanage = OrphanageStoreService.execute(data)      
+      const orphanage = await OrphanageStoreService.execute(data)            
       return res.status(200).json(orphanage)
       
     } catch (error) {
